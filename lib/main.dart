@@ -11,28 +11,40 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Catalogo de peliculas',
-      theme: ThemeData(
-
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-
-      ),
+      title: 'Movie App',
+      theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: 'Catalogo de peliculas'),
+      home: const HomeMovieScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-
-  final String title;
+class HomeMovieScreen extends StatelessWidget {
+  const HomeMovieScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Movies Home',
+        style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+        ),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      ),
+      body: const Center(
+        child: Text(
+          'Bienvenido a Movie App!',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
 
+  }
+}
+/*
 class _MyHomePageState extends State<MyHomePage> {
 
   @override
@@ -49,10 +61,10 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('HOLA MUNDO'),
+            const Text('Hello World'),
           ],
         ),
       ),
     );
-  }
-}
+  }*/
+
