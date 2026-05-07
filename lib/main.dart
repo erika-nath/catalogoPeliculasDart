@@ -40,6 +40,26 @@ class HomeMovieScreen extends StatelessWidget {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.blueAccent,
+        currentIndex: 0, //deja prendido el icono de home
+        items: const [
+           BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+
+        ],
+      ),
+
     );
 
   }
