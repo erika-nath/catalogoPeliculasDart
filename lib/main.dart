@@ -7,7 +7,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // Root
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,11 +34,42 @@ class HomeMovieScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       ),
-      body: const Center(
-        child: Text(
-          'Bienvenido a Movie App!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
+      body: SingleChildScrollView(
+       child:Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: const Text(
+              'Estrenos',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Container(
+                    width:100,
+                    height: 150,
+                    color: Colors.grey[300],
+                  ),
+                  Container(
+                    color:Colors.blue,
+                     padding: const EdgeInsets.symmetric(horizontal:4),
+                     child: const Text(
+                      'Nuevo',
+                      style: TextStyle(color: Colors.white, fontSize: 12)
+                     ),
+                  ),
+                ],
+              ),
+              Container(width: 100, height: 150, color: Colors.grey[300]),
+              Container(width: 100, height: 150, color: Colors.grey[300]),
+          ],)
+       ],)
       ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.blueAccent,
@@ -46,15 +77,15 @@ class HomeMovieScreen extends StatelessWidget {
         items: const [
            BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favorites',
+            label: 'Favoritos',
           ),
-          BottomNavigationBarItem(
+         BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: 'Search',
+            label: 'Buscador',
           ),
 
         ],
@@ -64,27 +95,4 @@ class HomeMovieScreen extends StatelessWidget {
 
   }
 }
-/*
-class _MyHomePageState extends State<MyHomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
-      ),
-      body: Center(
-
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Hello World'),
-          ],
-        ),
-      ),
-    );
-  }*/
 
