@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 class Welcome extends StatelessWidget {
   const Welcome({super.key});
 
-  Widget welcomeText(){
+  Widget welcomeText() {
     return const Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -49,28 +49,38 @@ class Welcome extends StatelessWidget {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    const String urlBackgroundCine =
+        'https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg?_gl=1*3ua68b*_ga*NjI1NTgxNzQ5LjE3NzkwNDEwMDY.*_ga_8JE65Q40S6*czE3Nzk2NTM1NjQkbzQkZzEkdDE3Nzk2NTM5OTgkajYwJGwwJGgw';
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(urlBackgroundCine),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(color: Colors.white.withOpacity(0.6)),
 
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [welcomeText(), const SizedBox(height: 40)],
 
-@override
-Widget build(BuildContext context){
-  const String urlBackgroundCine ='https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg?_gl=1*3ua68b*_ga*NjI1NTgxNzQ5LjE3NzkwNDEwMDY.*_ga_8JE65Q40S6*czE3Nzk2NTM1NjQkbzQkZzEkdDE3Nzk2NTM5OTgkajYwJGwwJGgw';
-return Scaffold(
-  body: Stack(
-    children: [
-      Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-          image: NetworkImage(urlBackgroundCine),
-          fit: BoxFit.cover
-          )
-        ),
-      )
-    ],
-  ),
-
-);
-
-}}
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 //HOME widgets
 class HomeMovieScreen extends StatelessWidget {
