@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 void main() {
   runApp(const MyApp());
 }
@@ -104,8 +105,55 @@ class Welcome extends StatelessWidget {
 }
 
 //HOME widgets
-class HomeMovieScreen extends StatelessWidget {
+class HomeMovieScreen extends StatefulWidget {
   const HomeMovieScreen({super.key});
+
+  @override
+  State<HomeMovieScreen> createState() => _HomeMovieScreenState();
+}
+
+class _HomeMovieScreenState extends State<HomeMovieScreen> {
+  String urlPosterPelicula = '';
+  String tituloPelicula = 'Cargando...';
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    requestMovie();
+  }
+Future<void> requestMovie() async {
+    const String urlApi = 'https://www.omdbapi.com/?t=Batman&apikey=21957d09';
+
+    try {
+      final respuesta = await http.get(Uri.parse(urlApi));
+
+      if (respuesta.statusCode == 200) {
+        final datosContestados = jsonDecode(respuesta.body);
+//Debugueo
+        print('Cuerpo completo de la API: ${respuesta.body}');
+        print('Título recuperado: ${datosContestados['Title']}');
+        print('Link del póster: ${datosContestados['Poster']}');
+
+        setState(() {
+          urlPosterPelicula = datosContestados['Poster'];
+          tituloPelicula = datosContestados['Title'];
+          cargando = false;
+        });
+      }
+
+    } catch (error) {
+      setState(() {
+        tituloPelicula = 'Error en servidor';
+        cargando = false;
+      });
+    }
+
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
