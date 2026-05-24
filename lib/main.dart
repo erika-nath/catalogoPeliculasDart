@@ -31,8 +31,9 @@ class Welcome extends StatelessWidget {
           'Buenas pelis',
           style: TextStyle(
             fontSize: 38,
-            color: Colors.amberAccent,
+            color: Color.fromARGB(255, 64, 128, 255),
             letterSpacing: 2,
+            fontWeight: FontWeight.bold,
           ),
         ),
         SizedBox(height: 12),
@@ -40,8 +41,8 @@ class Welcome extends StatelessWidget {
           'El lugar donde estan las mejores pelis',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 16,
-            color: Colors.white70,
+            fontSize: 20,
+            color: Color.fromARGB(253, 255, 255, 255),
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -71,8 +72,28 @@ class Welcome extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [welcomeText(), const SizedBox(height: 40)],
+                children: [
+                  welcomeText(),
+                  const SizedBox(height: 40),
 
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 68, 87, 255),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 15
+                      ),
+                      ),
+                      onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomeMovieScreen()),
+                      );
+                    },
+                    child: const Text('Ver Catálogo', style: TextStyle(color: Colors.white, fontSize: 18)),
+                    ),
+
+                ],
               ),
             ),
           ),
