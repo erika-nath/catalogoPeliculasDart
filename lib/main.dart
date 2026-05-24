@@ -14,11 +14,37 @@ class MyApp extends StatelessWidget {
       title: 'Movie App',
       theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: const HomeMovieScreen(),
+      home:  Welcome(),
     );
   }
 }
 
+//layout
+class Welcome extends StatelessWidget{
+const Welcome({super.key});
+@override
+Widget build(BuildContext context){
+  return const Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        'Bienvenido',
+        style: TextStyle(
+          fontSize: 38,
+          color: Colors.amberAccent,
+          letterSpacing: 2,
+        ),
+
+        ),
+
+  ],
+  );
+
+}
+
+}
+
+//HOME widgets
 class HomeMovieScreen extends StatelessWidget {
   const HomeMovieScreen({super.key});
 
