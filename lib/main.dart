@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 void main() {
   runApp(const MyApp());
 }
@@ -82,18 +83,22 @@ class Welcome extends StatelessWidget {
                       backgroundColor: const Color.fromARGB(255, 68, 87, 255),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 40,
-                        vertical: 15
+                        vertical: 15,
                       ),
-                      ),
-                      onPressed: () {
+                    ),
+                    onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const HomeMovieScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const HomeMovieScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Ver Catálogo', style: TextStyle(color: Colors.white, fontSize: 18)),
+                    child: const Text(
+                      'Ver Catálogo',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-
+                  ),
                 ],
               ),
             ),
@@ -116,13 +121,15 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
   String urlPosterPelicula = '';
   String tituloPelicula = 'Cargando...';
   bool cargando = true;
+  String mensajeFirebase = '';
 
   @override
   void initState() {
     super.initState();
     requestMovie();
   }
-Future<void> requestMovie() async {
+
+  Future<void> requestMovie() async {
     const String urlApi = 'https://www.omdbapi.com/?t=Batman&apikey=21957d09';
 
     try {
@@ -130,10 +137,6 @@ Future<void> requestMovie() async {
 
       if (respuesta.statusCode == 200) {
         final datosContestados = jsonDecode(respuesta.body);
-//Debugueo
-        print('Cuerpo completo de la API: ${respuesta.body}');
-        print('Título recuperado: ${datosContestados['Title']}');
-        print('Link del póster: ${datosContestados['Poster']}');
 
         setState(() {
           urlPosterPelicula = datosContestados['Poster'];
@@ -141,18 +144,45 @@ Future<void> requestMovie() async {
           cargando = false;
         });
       }
-
     } catch (error) {
       setState(() {
         tituloPelicula = 'Error en servidor';
         cargando = false;
       });
     }
-
   }
+Future<void> guardarEnFirebase() async {
+    // Usamos una base de datos de prueba en Firebase (formato REST)
+    const String urlFirebase = 'https://moviefirebase-udg-default-rtdb.firebaseio.com/favoritas.json';
 
+    setState(() {
+      mensajeFirebase = 'Guardando en Firebase...';
+    });
 
+    try {
+      // Enviamos un paquete JSON con el título de la película mediante POST
+      final respuesta = await http.post(
+        Uri.parse(urlFirebase),
+        body: jsonEncode({
+          'titulo': tituloPelicula,
+          'fecha_guardado': DateTime.now().toString(),
+          'usuario': 'Nathaly_QA'
+        }),
+      );
 
+      if (respuesta.statusCode == 200 || respuesta.statusCode == 201) {
+        print('=== ¡DATOS ENVIADOS A FIREBASE CON ÉXITO! ===');
+        setState(() {
+          mensajeFirebase = '¡Película guardada en Firebase exitosamente!';
+        });
+      }
+    } catch (error) {
+      print('Error al conectar con Firebase: $error');
+      setState(() {
+        mensajeFirebase = 'Error al conectar con Firebase';
+      });
+    }
+  }
 
 
   @override
@@ -185,38 +215,48 @@ Future<void> requestMovie() async {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 cargando
-                ? const SizedBox(
-                  width: 100,
+                    ? const SizedBox(
+                        width: 100,
                         height: 150,
                         child: Center(child: CircularProgressIndicator()),
-                )
-                :Stack(
-                  alignment: Alignment.topRight,
-                  children: [
-                    Container(width: 100, height: 150,
-                    decoration: BoxDecoration(
-    color: Colors.grey[300],
-    image: DecorationImage(
-      image: NetworkImage(urlPosterPelicula),
-      fit: BoxFit.cover,
-    )
-  ),
-
-
-                    ),
-                    Container(
-                      color: Colors.blue,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: const Text(
-                        'Nuevo',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      )
+                    : Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              image: DecorationImage(
+                                image: NetworkImage(urlPosterPelicula),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            color: Colors.blue,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: const Text(
+                              'Nuevo',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
                 Container(width: 100, height: 150, color: Colors.grey[300]),
                 Container(width: 100, height: 150, color: Colors.grey[300]),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Película: $tituloPelicula',
+                style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+              ),
             ),
           ],
         ),
