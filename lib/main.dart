@@ -184,10 +184,26 @@ Future<void> requestMovie() async {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Stack(
+                cargando
+                ? const SizedBox(
+                  width: 100,
+                        height: 150,
+                        child: Center(child: CircularProgressIndicator()),
+                )
+                :Stack(
                   alignment: Alignment.topRight,
                   children: [
-                    Container(width: 100, height: 150, color: Colors.grey[300]),
+                    Container(width: 100, height: 150,
+                    decoration: BoxDecoration(
+    color: Colors.grey[300],
+    image: DecorationImage(
+      image: NetworkImage(urlPosterPelicula),
+      fit: BoxFit.cover,
+    )
+  ),
+
+
+                    ),
                     Container(
                       color: Colors.blue,
                       padding: const EdgeInsets.symmetric(horizontal: 4),
