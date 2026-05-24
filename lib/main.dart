@@ -28,14 +28,24 @@ Widget build(BuildContext context){
     mainAxisSize: MainAxisSize.min,
     children: [
       Text(
-        'Bienvenido',
+        'Buenas pelis',
         style: TextStyle(
           fontSize: 38,
           color: Colors.amberAccent,
           letterSpacing: 2,
         ),
-
         ),
+        SizedBox(height: 12),
+        Text(
+'El lugar donde estan las mejores pelis',
+textAlign: TextAlign.center,
+style: TextStyle(
+  fontSize: 16,
+            color: Colors.white70,
+            fontStyle: FontStyle.italic,
+),
+
+        )
 
   ],
   );
