@@ -20,13 +20,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class PantallaInicio extends StatelessWidget {
   const PantallaInicio({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const String urlFondoCine = 'https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg?_gl=1*3ua68b*_ga*NjI1NTgxNzQ5LjE3NzkwNDEwMDY.*_ga_8JE65Q40S6*czE3Nzk2NTM1NjQkbzQkZzEkdDE3Nzk2NTM9OTgkajYwJGwwJGgw';
+    const String urlFondoCine = 'https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg';
 
     return Scaffold(
       body: Stack(
@@ -49,12 +48,7 @@ class PantallaInicio extends StatelessWidget {
                 children: [
                   const Text(
                     'Buenas pelis',
-                    style: TextStyle(
-                      fontSize: 38,
-                      color: Color.fromARGB(255, 64, 128, 255),
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
+                    style: TextStyle(fontSize: 38, color: Color.fromARGB(255, 64, 128, 255), fontWeight: FontWeight.bold, letterSpacing: 2),
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -99,9 +93,7 @@ class PantallaInicio extends StatelessWidget {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[800]),
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('¡Usuario registrado!')),
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Usuario registrado!')));
                         },
                         child: const Text('Registrarse', style: TextStyle(color: Colors.white)),
                       ),
@@ -117,7 +109,6 @@ class PantallaInicio extends StatelessWidget {
   }
 }
 
-//HOME widgets
 class HomeMovieScreen extends StatefulWidget {
   const HomeMovieScreen({super.key});
 
@@ -130,7 +121,7 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
   String tituloPelicula = 'Cargando...';
   bool cargando = true;
   String mensajeFirebase = '';
-  List<String> listaPeliculasFirebase = [];
+  List<dynamic> listaPeliculasFirebase = [];
 
   @override
   void initState() {
@@ -141,13 +132,10 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
 
   Future<void> requestMovie() async {
     const String urlApi = 'https://www.omdbapi.com/?t=Batman&apikey=21957d09';
-
     try {
       final respuesta = await http.get(Uri.parse(urlApi));
-
       if (respuesta.statusCode == 200) {
         final datosContestados = jsonDecode(respuesta.body);
-
         setState(() {
           urlPosterPelicula = datosContestados['Poster'];
           tituloPelicula = datosContestados['Title'];
@@ -162,57 +150,85 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
     }
   }
 
-  //Funcion Firebase
-Future<void> readFirebase() async {
+  Future<void> readFirebase() async {
     const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
-final respuesta = await http.get(Uri.parse(urlFirebase));
-if (respuesta.body == 'null') {
-      return;
+    try {
+      final respuesta = await http.get(Uri.parse(urlFirebase));
+
+      if (respuesta.body == 'null' || respuesta.body.isEmpty) {
+        setState(() {
+          listaPeliculasFirebase = [];
+        });
+        return;
+      }
+
+      final Map<String, dynamic> datosDeNube = jsonDecode(respuesta.body);
+      List<Map<String, dynamic>> listaTemporal = [];
+
+      datosDeNube.forEach((id, datos) {
+        if (datos != null) {
+          String img = datos['imagen'] ?? '';
+          if (img.isEmpty || !img.startsWith('http')) {
+            img = 'https://m.media-amazon.com/images/M/MV_BYThjYzM3Y2UtZTE1Yi00MDMwLWI3MTQtYmFmNzNlMGQ2N2I1XkEyXkFqcGc@._V1_SX300.jpg';
+          }
+
+          listaTemporal.add({
+            'id': id,
+            'titulo': datos['titulo'] ?? 'Sin título',
+            'imagen': img,
+          });
+        }
+      });
+
+      setState(() {
+        listaPeliculasFirebase = listaTemporal;
+      });
+    } catch (error) {
+      print('Error al leer: $error');
     }
-
-    final Map<String, dynamic> datosDeNube = jsonDecode(respuesta.body);
-
-    List<String> listaTemporal = [];
-
-    for (var pelicula in datosDeNube.values) {
-      listaTemporal.add(pelicula['titulo']);
-    }
-
-    setState(() {
-      listaPeliculasFirebase = listaTemporal;
-    });
   }
 
   Future<void> guardarEnFirebase() async {
- const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
-    await http.post(
-      Uri.parse(urlFirebase),
-      body: jsonEncode({
-        'titulo': tituloPelicula,
-      }),
-    );
+    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
 
-    setState(() {
-      mensajeFirebase = 'Película guardada';
-    });
-    readFirebase();
+    String imgFinal = (urlPosterPelicula.isEmpty || !urlPosterPelicula.startsWith('http'))
+        ? 'https://m.media-amazon.com/images/M/MV_BYThjYzM3Y2UtZTE1Yi00MDMwLWI3MTQtYmFmNzNlMGQ2N2I1XkEyXkFqcGc@._V1_SX300.jpg'
+        : urlPosterPelicula;
+
+    try {
+      await http.post(
+        Uri.parse(urlFirebase),
+        body: jsonEncode({
+          'titulo': tituloPelicula,
+          'imagen': imgFinal,
+        }),
+      );
+      setState(() {
+        mensajeFirebase = '¡Película guardada!';
+      });
+      readFirebase();
+    } catch (error) {
+      print('Error al guardar: $error');
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Movies Home',
-          style: TextStyle(
-            color: Colors.blueAccent,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Movies Home', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.blueAccent),
+            onPressed: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (context) => const PantallaAdmin()));
+              readFirebase();
+            },
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -220,113 +236,92 @@ if (respuesta.body == 'null') {
           children: [
             Container(
               padding: const EdgeInsets.all(16.0),
-              child: const Text(
-                'Estrenos',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+              child: const Text('Estrenos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                cargando
-                    ? const SizedBox(
-                        width: 100,
-                        height: 150,
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : Stack(
-                        alignment: Alignment.topRight,
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              image: DecorationImage(
-                                image: NetworkImage(urlPosterPelicula),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PantallaDescripcion()));
+                  },
+                  child: cargando
+                      ? const SizedBox(width: 100, height: 150, child: Center(child: CircularProgressIndicator()))
+                      : Container(
+                          width: 100,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            image: DecorationImage(image: NetworkImage(urlPosterPelicula), fit: BoxFit.cover),
                           ),
-                          Container(
-                            color: Colors.blue,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: const Text(
-                              'Nuevo',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                ),
                 Container(width: 100, height: 150, color: Colors.grey[300]),
                 Container(width: 100, height: 150, color: Colors.grey[300]),
               ],
             ),
+            const Padding(
+              padding: EdgeInsets.only(left: 16.0, top: 4),
+              child: Text('(Toca el póster de Batman para ver detalles)', style: TextStyle(fontSize: 11, color: Colors.grey)),
+            ),
+            const SizedBox(height: 30),
 
-  const SizedBox(height: 30),
-
-            // btn firebase
             Center(
               child: Column(
                 children: [
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
-                    onPressed: guardarEnFirebase, // Llama a la función de Firebase
+                    onPressed: guardarEnFirebase,
                     icon: const Icon(Icons.cloud_upload, color: Colors.white),
                     label: const Text('Guardar en Firebase', style: TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(height: 10),
-
-            Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      mensajeFirebase,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                    ),
+                  Text(mensajeFirebase, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                ],
               ),
-
-          ],
-        ),
             ),
-const Divider(height: 30),
-Padding(
+
+            const Divider(height: 30),
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Películas en mi Base de Datos:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                                    for (var nombre in listaPeliculasFirebase)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text('• $nombre', style: const TextStyle(fontSize: 16, color: Colors.black87)),
+
+                  if (listaPeliculasFirebase.isEmpty)
+                    const Text('Base de datos vacía. ¡Dale guardar arriba!', style: TextStyle(color: Colors.grey)),
+
+                  for (var peli in listaPeliculasFirebase)
+                    Card(
+                      elevation: 1,
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: ListTile(
+                        leading: Image.network(peli['imagen'], width: 45, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.movie, size: 45)),
+                        title: Text(peli['titulo'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                        trailing: const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                      ),
                     ),
                 ],
               ),
             ),
-          ], // Cierre del children de la Column principal
-        ), // Cierre de la Column principal
-      ), // Cierre
-
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.blueAccent,
-        currentIndex: 0, //deja prendido el icono de home
+        currentIndex: 1,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favoritos',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favoritos'),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Buscador'),
         ],
       ),
- ); // Cierre del Scaffold
-  } // Cierre del método Widget build
-} // Cie
+    );
+  }
+}
+
 class PantallaDescripcion extends StatelessWidget {
   const PantallaDescripcion({super.key});
 
@@ -357,18 +352,104 @@ class PantallaDescripcion extends StatelessWidget {
             const Text('Género: Acción, Aventura', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 15),
             const Text('Sinopsis:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const Text(
-              'El caballero de la noche de Gotham City comienza su guerra contra el crimen con su primer gran enemigo: el Joker.',
-              style: TextStyle(fontSize: 14),
-            ),
+            const Text('El caballero de la noche de Gotham City comienza su guerra contra el crimen con su primer gran enemigo: el Joker.', style: TextStyle(fontSize: 14)),
           ],
         ),
       ),
     );
   }
 }
-class PantallaAdmin extends StatelessWidget {
+
+class PantallaAdmin extends StatefulWidget {
   const PantallaAdmin({super.key});
+
+  @override
+  State<PantallaAdmin> createState() => _PantallaAdminState();
+}
+
+class _PantallaAdminState extends State<PantallaAdmin> {
+  final TextEditingController _tituloController = TextEditingController();
+  final TextEditingController _imagenController = TextEditingController();
+  List<dynamic> listaAdminFirebase = [];
+
+  @override
+  void initState() {
+    super.initState();
+    readAdminFirebase();
+  }
+
+  Future<void> readAdminFirebase() async {
+    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
+    try {
+      final respuesta = await http.get(Uri.parse(urlFirebase));
+      if (respuesta.body == 'null' || respuesta.body.isEmpty) {
+        setState(() { listaAdminFirebase = []; });
+        return;
+      }
+
+      final Map<String, dynamic> datosDeNube = jsonDecode(respuesta.body);
+      List<Map<String, dynamic>> listaTemporal = [];
+
+      datosDeNube.forEach((id, datos) {
+        if (datos != null) {
+          String img = datos['imagen'] ?? '';
+          if (img.isEmpty || !img.startsWith('http')) {
+            img = 'https://m.media-amazon.com/images/M/MV_BYThjYzM3Y2UtZTE1Yi00MDMwLWI3MTQtYmFmNzNlMGQ2N2I1XkEyXkFqcGc@._V1_SX300.jpg';
+          }
+
+          listaTemporal.add({
+            'id': id,
+            'titulo': datos['titulo'] ?? 'Sin título',
+            'imagen': img,
+          });
+        }
+      });
+
+      setState(() { listaAdminFirebase = listaTemporal; });
+    } catch (error) {
+      print('Error al leer en admin: $error');
+    }
+  }
+
+  Future<void> subirPeliculaManual() async {
+    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
+    if (_tituloController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Escribe el título primero.')));
+      return;
+    }
+    String urlTexto = _imagenController.text.trim();
+    String fotoFinal = (urlTexto.isEmpty || !urlTexto.startsWith('http'))
+        ? 'https://m.media-amazon.com/images/M/MV_BYThjYzM3Y2UtZTE1Yi00MDMwLWI3MTQtYmFmNzNlMGQ2N2I1XkEyXkFqcGc@._V1_SX300.jpg'
+        : urlTexto;
+
+    try {
+      await http.post(
+        Uri.parse(urlFirebase),
+        body: jsonEncode({
+          'titulo': _tituloController.text,
+          'imagen': fotoFinal,
+        }),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Película dada de alta con éxito!')));
+      _tituloController.clear();
+      _imagenController.clear();
+      readAdminFirebase();
+    } catch (e) {
+      print('Error al guardar: $e');
+    }
+  }
+
+  Future<void> borrarPeliculaEspecifica(String id) async {
+    final String urlBorrar = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas/$id.json';
+    try {
+      await http.delete(Uri.parse(urlBorrar));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Película eliminada correctamente.')));
+      readAdminFirebase();
+    } catch (e) {
+      print('Error al borrar: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -379,35 +460,52 @@ class PantallaAdmin extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Formulario de Altas y Bajas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Formulario de Altas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
             const SizedBox(height: 15),
-            const TextField(decoration: InputDecoration(labelText: 'Título de la película')),
+            TextField(controller: _tituloController, decoration: const InputDecoration(labelText: 'Título de la película', border: OutlineInputBorder())),
             const SizedBox(height: 10),
-            const TextField(decoration: InputDecoration(labelText: 'Año')),
+            TextField(controller: _imagenController, decoration: const InputDecoration(labelText: 'URL de la Imagen (http://...)', border: OutlineInputBorder())),
             const SizedBox(height: 10),
-            const TextField(decoration: InputDecoration(labelText: 'Director')),
+            const TextField(decoration: InputDecoration(labelText: 'Año (Opcional)', border: OutlineInputBorder())),
             const SizedBox(height: 10),
-            const TextField(decoration: InputDecoration(labelText: 'Género')),
+            const TextField(decoration: InputDecoration(labelText: 'Director (Opcional)', border: OutlineInputBorder())),
             const SizedBox(height: 10),
-            const TextField(decoration: InputDecoration(labelText: 'Sinopsis')),
+            const TextField(decoration: InputDecoration(labelText: 'Género (Opcional)', border: OutlineInputBorder())),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Sinopsis (Opcional)', border: OutlineInputBorder())),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Película dada de alta (Simulado)!')));
-                  },
-                  child: const Text('Dar de Alta'),
+
+            Center(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                onPressed: subirPeliculaManual,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text('Dar de Alta', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+            ),
+
+            const Divider(height: 40),
+
+            const Text('Películas Recién Agregadas / Control de Bajas:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.redAccent)),
+            const SizedBox(height: 12),
+
+            if (listaAdminFirebase.isEmpty)
+              const Text('No hay películas en Firebase.', style: TextStyle(color: Colors.grey)),
+
+            for (var peli in listaAdminFirebase)
+              Card(
+                elevation: 1,
+                margin: const EdgeInsets.symmetric(vertical: 4.0),
+                child: ListTile(
+                  leading: Image.network(peli['imagen'], width: 45, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.movie, size: 45)),
+                  title: Text(peli['titulo'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  // Bote de basura rojo exclusivo para dar de baja registros individuales
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => borrarPeliculaEspecifica(peli['id']),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Película dada de baja (Simulado)!')));
-                  },
-                  child: const Text('Dar de Baja'),
-                ),
-              ],
-            )
+              ),
           ],
         ),
       ),
