@@ -9,95 +9,103 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Root
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Movie App',
       theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: Welcome(),
+      home: const PantallaInicio(),
     );
   }
 }
 
-//layout
-class Welcome extends StatelessWidget {
-  const Welcome({super.key});
 
-  Widget welcomeText() {
-    return const Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'Buenas pelis',
-          style: TextStyle(
-            fontSize: 38,
-            color: Color.fromARGB(255, 64, 128, 255),
-            letterSpacing: 2,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 12),
-        Text(
-          'El lugar donde estan las mejores pelis',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 20,
-            color: Color.fromARGB(253, 255, 255, 255),
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ],
-    );
-  }
+class PantallaInicio extends StatelessWidget {
+  const PantallaInicio({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const String urlBackgroundCine =
-        'https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg?_gl=1*3ua68b*_ga*NjI1NTgxNzQ5LjE3NzkwNDEwMDY.*_ga_8JE65Q40S6*czE3Nzk2NTM1NjQkbzQkZzEkdDE3Nzk2NTM5OTgkajYwJGwwJGgw';
+    const String urlFondoCine = 'https://images.pexels.com/photos/18501410/pexels-photo-18501410.jpeg?_gl=1*3ua68b*_ga*NjI1NTgxNzQ5LjE3NzkwNDEwMDY.*_ga_8JE65Q40S6*czE3Nzk2NTM1NjQkbzQkZzEkdDE3Nzk2NTM9OTgkajYwJGwwJGgw';
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(urlBackgroundCine),
+                image: NetworkImage(urlFondoCine),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          Container(color: Colors.white.withOpacity(0.6)),
+          Container(color: Colors.black.withOpacity(0.6)),
 
           Center(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  welcomeText(),
+                  const Text(
+                    'Buenas pelis',
+                    style: TextStyle(
+                      fontSize: 38,
+                      color: Color.fromARGB(255, 64, 128, 255),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'El lugar donde estan las mejores pelis',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18, color: Colors.white, fontStyle: FontStyle.italic),
+                  ),
                   const SizedBox(height: 40),
 
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 68, 87, 255),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 15,
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      labelStyle: const TextStyle(color: Colors.black87),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      labelStyle: const TextStyle(color: Colors.black87),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 68, 87, 255)),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeMovieScreen()));
+                        },
+                        child: const Text('Ingresar', style: TextStyle(color: Colors.white)),
                       ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeMovieScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Ver Catálogo',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[800]),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('¡Usuario registrado!')),
+                          );
+                        },
+                        child: const Text('Registrarse', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
                   ),
                 ],
               ),
