@@ -156,8 +156,11 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
 
   //Funcion Firebase
 Future<void> readFirebase() async {
-    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/';
+    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
 final respuesta = await http.get(Uri.parse(urlFirebase));
+if (respuesta.body == 'null') {
+      return;
+    }
 
     final Map<String, dynamic> datosDeNube = jsonDecode(respuesta.body);
 
@@ -174,7 +177,7 @@ final respuesta = await http.get(Uri.parse(urlFirebase));
   }
 
   Future<void> guardarEnFirebase() async {
- const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/';
+ const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/favoritas.json';
     await http.post(
       Uri.parse(urlFirebase),
       body: jsonEncode({
@@ -258,7 +261,7 @@ final respuesta = await http.get(Uri.parse(urlFirebase));
 
   const SizedBox(height: 30),
 
-            // 👁️ NUEVO COMPONENTE: Botón para detonar la conexión a Firebase
+            // btn firebase
             Center(
               child: Column(
                 children: [
@@ -282,10 +285,25 @@ final respuesta = await http.get(Uri.parse(urlFirebase));
           ],
         ),
             ),
-          ],
-        ),
-      ),
-
+const Divider(height: 30),
+Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Películas en mi Base de Datos:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                                    for (var nombre in listaPeliculasFirebase)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Text('• $nombre', style: const TextStyle(fontSize: 16, color: Colors.black87)),
+                    ),
+                ],
+              ),
+            ),
+          ], // Cierre del children de la Column principal
+        ), // Cierre de la Column principal
+      ), // Cierre
 
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.blueAccent,
@@ -299,6 +317,6 @@ final respuesta = await http.get(Uri.parse(urlFirebase));
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Buscador'),
         ],
       ),
-    );
-  }
-}
+ ); // Cierre del Scaffold
+  } // Cierre del método Widget build
+} // Cie
