@@ -122,11 +122,13 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
   String tituloPelicula = 'Cargando...';
   bool cargando = true;
   String mensajeFirebase = '';
+  List<String> listaPeliculasFirebase = [];
 
   @override
   void initState() {
     super.initState();
     requestMovie();
+    readFirebase();
   }
 
   Future<void> requestMovie() async {
@@ -151,37 +153,39 @@ class _HomeMovieScreenState extends State<HomeMovieScreen> {
       });
     }
   }
-Future<void> guardarEnFirebase() async {
-    // Usamos una base de datos de prueba en Firebase (formato REST)
-    const String urlFirebase = 'https://moviefirebase-udg-default-rtdb.firebaseio.com/favoritas.json';
+
+  //Funcion Firebase
+Future<void> readFirebase() async {
+    const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/';
+final respuesta = await http.get(Uri.parse(urlFirebase));
+
+    final Map<String, dynamic> datosDeNube = jsonDecode(respuesta.body);
+
+    List<String> listaTemporal = [];
+
+    for (var pelicula in datosDeNube.values) {
+      listaTemporal.add(pelicula['titulo']);
+    }
+
+    // Actualizamos la pantalla con los nuevos títulos
+    setState(() {
+      listaPeliculasFirebase = listaTemporal;
+    });
+  }
+
+  Future<void> guardarEnFirebase() async {
+ const String urlFirebase = 'https://apppeliculas-7c157-default-rtdb.firebaseio.com/';
+    await http.post(
+      Uri.parse(urlFirebase),
+      body: jsonEncode({
+        'titulo': tituloPelicula,
+      }),
+    );
 
     setState(() {
-      mensajeFirebase = 'Guardando en Firebase...';
+      mensajeFirebase = 'Película guardada';
     });
-
-    try {
-      // Enviamos un paquete JSON con el título de la película mediante POST
-      final respuesta = await http.post(
-        Uri.parse(urlFirebase),
-        body: jsonEncode({
-          'titulo': tituloPelicula,
-          'fecha_guardado': DateTime.now().toString(),
-          'usuario': 'Nathaly_QA'
-        }),
-      );
-
-      if (respuesta.statusCode == 200 || respuesta.statusCode == 201) {
-        print('=== ¡DATOS ENVIADOS A FIREBASE CON ÉXITO! ===');
-        setState(() {
-          mensajeFirebase = '¡Película guardada en Firebase exitosamente!';
-        });
-      }
-    } catch (error) {
-      print('Error al conectar con Firebase: $error');
-      setState(() {
-        mensajeFirebase = 'Error al conectar con Firebase';
-      });
-    }
+    readFirebase();
   }
 
 
@@ -251,16 +255,38 @@ Future<void> guardarEnFirebase() async {
                 Container(width: 100, height: 150, color: Colors.grey[300]),
               ],
             ),
+
+  const SizedBox(height: 30),
+
+            // 👁️ NUEVO COMPONENTE: Botón para detonar la conexión a Firebase
+            Center(
+              child: Column(
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
+                    onPressed: guardarEnFirebase, // Llama a la función de Firebase
+                    icon: const Icon(Icons.cloud_upload, color: Colors.white),
+                    label: const Text('Guardar en Firebase', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(height: 10),
+
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Película: $tituloPelicula',
-                style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      mensajeFirebase,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                    ),
               ),
+
+          ],
+        ),
             ),
           ],
         ),
       ),
+
+
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.blueAccent,
         currentIndex: 0, //deja prendido el icono de home
