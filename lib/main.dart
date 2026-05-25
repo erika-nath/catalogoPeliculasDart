@@ -178,7 +178,6 @@ if (respuesta.body == 'null') {
       listaTemporal.add(pelicula['titulo']);
     }
 
-    // Actualizamos la pantalla con los nuevos títulos
     setState(() {
       listaPeliculasFirebase = listaTemporal;
     });
@@ -328,3 +327,43 @@ Padding(
  ); // Cierre del Scaffold
   } // Cierre del método Widget build
 } // Cie
+class PantallaDescripcion extends StatelessWidget {
+  const PantallaDescripcion({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Detalle de la Película')),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 120,
+                height: 180,
+                color: Colors.grey[300],
+                child: const Image(
+                  image: NetworkImage('https://m.media-amazon.com/images/M/MV_BYThjYzM3Y2UtZTE1Yi00MDMwLWI3MTQtYmFmNzNlMGQ2N2I1XkEyXkFqcGc@._V1_SX300.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Título: Batman', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('Año: 1989', style: TextStyle(fontSize: 16)),
+            const Text('Director: Tim Burton', style: TextStyle(fontSize: 16)),
+            const Text('Género: Acción, Aventura', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 15),
+            const Text('Sinopsis:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text(
+              'El caballero de la noche de Gotham City comienza su guerra contra el crimen con su primer gran enemigo: el Joker.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
