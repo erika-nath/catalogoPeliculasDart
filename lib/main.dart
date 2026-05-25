@@ -367,3 +367,50 @@ class PantallaDescripcion extends StatelessWidget {
     );
   }
 }
+class PantallaAdmin extends StatelessWidget {
+  const PantallaAdmin({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Panel de Administración')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Formulario de Altas y Bajas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
+            const TextField(decoration: InputDecoration(labelText: 'Título de la película')),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Año')),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Director')),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Género')),
+            const SizedBox(height: 10),
+            const TextField(decoration: InputDecoration(labelText: 'Sinopsis')),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Película dada de alta (Simulado)!')));
+                  },
+                  child: const Text('Dar de Alta'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Película dada de baja (Simulado)!')));
+                  },
+                  child: const Text('Dar de Baja'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
